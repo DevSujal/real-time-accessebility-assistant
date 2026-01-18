@@ -1,0 +1,17 @@
+{
+    "name": "visionassist",
+    "version": "1.0.0",
+    "description": "Real-Time Accessibility Assistant PWA",
+    "scripts": {
+        "build": "node build.js",
+        "start": "npx serve -l 3000"
+    },
+    "keywords": [
+        "accessibility",
+        "pwa",
+        "gemini",
+        "ai"
+    ],
+    "author": "VisionAssist Team",
+    "license": "MIT"
+}

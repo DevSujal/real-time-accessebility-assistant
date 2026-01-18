@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="Real-time AI assistant for visually impaired users - describes surroundings, reads text, and provides navigation assistance">
+    <meta name="theme-color" content="#0a0a0f">
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <title>VisionAssist - Real-Time Accessibility Assistant</title>
+</head>
+<body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- App Container -->
+    <div id="app" class="app-container">
+        
+        <!-- Header -->
+        <header class="app-header" role="banner">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                        </svg>
+                    </div>
+                    <h1>VisionAssist</h1>
+                </div>
+                <button id="settings-btn" class="icon-btn" aria-label="Settings" title="Settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main id="main-content" class="main-content" role="main">
+            
+            <!-- Camera View -->
+            <section class="camera-section" aria-label="Camera view">
+                <div class="camera-container">
+                    <video id="camera-feed" autoplay playsinline muted aria-label="Live camera feed"></video>
+                    <canvas id="capture-canvas" aria-hidden="true"></canvas>
+                    
+                    <!-- Camera Overlay -->
+                    <div class="camera-overlay">
+                        <div class="scan-line" aria-hidden="true"></div>
+                        <div class="corner-marks" aria-hidden="true">
+                            <span class="corner top-left"></span>
+                            <span class="corner top-right"></span>
+                            <span class="corner bottom-left"></span>
+                            <span class="corner bottom-right"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Indicator -->
+                    <div id="status-indicator" class="status-indicator" role="status" aria-live="polite">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Initializing...</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Description Panel -->
+            <section class="description-panel" aria-label="AI Description">
+                <div class="description-header">
+                    <h2>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        Live Description
+                    </h2>
+                    <button id="repeat-btn" class="icon-btn small" aria-label="Repeat last description" title="Repeat">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="1 4 1 10 7 10"/>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                        </svg>
+                    </button>
+                </div>
+                <div id="description-content" class="description-content" role="log" aria-live="polite" aria-atomic="false">
+                    <p class="placeholder">Tap a button below to start exploring your surroundings.</p>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Action Controls -->
+        <nav class="action-controls" role="navigation" aria-label="Main actions">
+            <div class="mode-tabs" role="tablist">
+                <button id="mode-explore" class="mode-tab active" role="tab" aria-selected="true" aria-controls="explore-panel">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <span>Explore</span>
+                </button>
+                <button id="mode-read" class="mode-tab" role="tab" aria-selected="false" aria-controls="read-panel">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    </svg>
+                    <span>Read</span>
+                </button>
+                <button id="mode-navigate" class="mode-tab" role="tab" aria-selected="false" aria-controls="navigate-panel">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+                    </svg>
+                    <span>Navigate</span>
+                </button>
+            </div>
+            
+            <!-- Primary Action Button -->
+            <button id="action-btn" class="action-btn pulse" aria-label="Describe what's in front of me">
+                <div class="btn-inner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <span>Describe</span>
+                </div>
+                <div class="btn-ring" aria-hidden="true"></div>
+            </button>
+
+            <!-- Secondary Actions -->
+            <div class="secondary-actions">
+                <button id="voice-btn" class="secondary-btn" aria-label="Voice commands" title="Hold to speak a command">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                        <line x1="12" y1="19" x2="12" y2="23"/>
+                        <line x1="8" y1="23" x2="16" y2="23"/>
+                    </svg>
+                </button>
+                <button id="camera-switch-btn" class="secondary-btn" aria-label="Switch camera" title="Switch between front and back camera">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                        <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                </button>
+                <button id="pause-btn" class="secondary-btn" aria-label="Pause speech" title="Pause current speech">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="6" y="4" width="4" height="16"/>
+                        <rect x="14" y="4" width="4" height="16"/>
+                    </svg>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal" role="dialog" aria-labelledby="settings-title" aria-modal="true" hidden>
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <header class="modal-header">
+                    <h2 id="settings-title">Settings</h2>
+                    <button id="close-settings" class="icon-btn" aria-label="Close settings">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </header>
+                <div class="modal-body">
+                    <!-- Voice Settings -->
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            <span class="label-text">Voice Settings</span>
+                        </label>
+                        <div class="setting-row">
+                            <label for="speech-rate">Speed</label>
+                            <input type="range" id="speech-rate" min="0.5" max="2" step="0.1" value="1">
+                            <span id="speech-rate-value">1x</span>
+                        </div>
+                        <div class="setting-row">
+                            <label for="speech-pitch">Pitch</label>
+                            <input type="range" id="speech-pitch" min="0.5" max="2" step="0.1" value="1">
+                            <span id="speech-pitch-value">1x</span>
+                        </div>
+                        <div class="setting-row">
+                            <label for="voice-select">Voice</label>
+                            <select id="voice-select" class="setting-select">
+                                <option value="">Loading voices...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Preferences -->
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            <span class="label-text">Preferences</span>
+                        </label>
+                        <div class="setting-row toggle">
+                            <label for="auto-describe">Auto-describe (every 5s)</label>
+                            <input type="checkbox" id="auto-describe" class="toggle-input">
+                            <span class="toggle-slider"></span>
+                        </div>
+                        <div class="setting-row toggle">
+                            <label for="haptic-feedback">Haptic Feedback</label>
+                            <input type="checkbox" id="haptic-feedback" class="toggle-input" checked>
+                            <span class="toggle-slider"></span>
+                        </div>
+                        <div class="setting-row toggle">
+                            <label for="high-contrast">High Contrast Mode</label>
+                            <input type="checkbox" id="high-contrast" class="toggle-input">
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </div>
+                </div>
+                <footer class="modal-footer">
+                    <button id="save-settings" class="primary-btn">Save Settings</button>
+                </footer>
+            </div>
+        </div>
+
+        <!-- Onboarding Modal -->
+        <div id="onboarding-modal" class="modal onboarding" role="dialog" aria-labelledby="onboarding-title" aria-modal="true" hidden>
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="onboarding-slides">
+                    <div class="slide active" data-slide="0">
+                        <div class="slide-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </div>
+                        <h2 id="onboarding-title">Welcome to VisionAssist</h2>
+                        <p>Your AI-powered assistant for navigating the world with confidence.</p>
+                    </div>
+                    <div class="slide" data-slide="1">
+                        <div class="slide-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </div>
+                        <h2>Explore Mode</h2>
+                        <p>Get instant descriptions of your surroundings. Point your camera and tap Describe.</p>
+                    </div>
+                    <div class="slide" data-slide="2">
+                        <div class="slide-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                            </svg>
+                        </div>
+                        <h2>Read Mode</h2>
+                        <p>Point at any text - signs, documents, labels - and have them read aloud.</p>
+                    </div>
+                    <div class="slide" data-slide="3">
+                        <div class="slide-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                                <line x1="12" y1="19" x2="12" y2="23"/>
+                            </svg>
+                        </div>
+                        <h2>Voice Commands</h2>
+                        <p>Say "Describe this" or "Read text" for hands-free control.</p>
+                    </div>
+                    <div class="slide" data-slide="3">
+                        <div class="slide-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                        <h2>Ready to Go!</h2>
+                        <p>Tap Describe to start exploring your surroundings with AI-powered descriptions.</p>
+                    </div>
+                </div>
+                <div class="onboarding-nav">
+                    <div class="dots" role="tablist">
+                        <button class="dot active" data-slide="0" role="tab" aria-selected="true" aria-label="Slide 1"></button>
+                        <button class="dot" data-slide="1" role="tab" aria-selected="false" aria-label="Slide 2"></button>
+                        <button class="dot" data-slide="2" role="tab" aria-selected="false" aria-label="Slide 3"></button>
+                        <button class="dot" data-slide="3" role="tab" aria-selected="false" aria-label="Slide 4"></button>
+                    </div>
+                    <button id="onboarding-next" class="primary-btn">Next</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toast-container" class="toast-container" role="alert" aria-live="assertive"></div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/speech.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/gemini.js"></script>
+    <script src="js/voice-commands.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
