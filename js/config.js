@@ -1,13 +1,16 @@
 /**
  * VisionAssist - Configuration
  * 
- * IMPORTANT: Replace 'YOUR_GEMINI_API_KEY_HERE' with your actual Gemini API key
- * Get your free API key at: https://aistudio.google.com/apikey
+ * This file is generated during build from environment variables.
+ * DO NOT commit your actual API key to source control.
+ * 
+ * For local development, copy this file to config.local.js and add your key.
+ * For production, set GEMINI_API_KEY in Vercel environment variables.
  */
 
 const CONFIG = {
-    // Gemini API Key - Replace with your actual key
-    GEMINI_API_KEY: '%%GEMINI_API_KEY%%',
+    // Gemini API Key - injected from environment variable during build
+    GEMINI_API_KEY: 'YOUR_GEMINI_API_KEY_HERE',
 
     // Model configuration - using 2.5 flash lite for better rate limits
     GEMINI_MODEL: 'gemini-2.5-flash-lite',

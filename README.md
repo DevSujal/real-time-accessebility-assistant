@@ -1,29 +1,326 @@
-# VisionAssist - Real-Time Accessibility Assistant
+# VisionAssist — Real-Time Accessibility Assistant
 
-AI-powered vision assistant for visually impaired users. Uses Gemini 3 to describe surroundings, read text, and provide navigation guidance.
+<div align="center">
 
-## Setup
+![VisionAssist](https://img.shields.io/badge/VisionAssist-v1.0.0-6366f1?style=for-the-badge)
+![PWA](https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge)
+![Gemini](https://img.shields.io/badge/Powered%20by-Gemini%20AI-blue?style=for-the-badge&logo=google)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
-### Local Development
-1. Copy `js/config.template.js` to `js/config.js`
-2. Add your Gemini API key to `config.js`
-3. Run `npx serve -l 3000`
+**A real-time AI-powered accessibility assistant for visually impaired users.**  
+Uses your device's camera and Google Gemini AI to describe surroundings, read text aloud, and provide navigation guidance — entirely hands-free.
 
-### Deployment (Vercel)
-1. Push to GitHub
-2. Import to Vercel
-3. Add environment variable: `GEMINI_API_KEY=your_key_here`
-4. Deploy!
+</div>
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [How It Works](#how-it-works)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Local Development](#local-development)
+  - [Deploy to Vercel](#deploy-to-vercel)
+- [Usage Guide](#usage-guide)
+  - [Modes](#modes)
+  - [Voice Commands](#voice-commands)
+  - [Keyboard Shortcuts](#keyboard-shortcuts)
+  - [Settings](#settings)
+- [Configuration](#configuration)
+- [Architecture](#architecture)
+- [Accessibility](#accessibility)
+- [License](#license)
+
+---
+
+## Overview
+
+VisionAssist is a **Progressive Web App (PWA)** built to assist visually impaired individuals in understanding their environment in real time. It leverages the device camera and Google's **Gemini AI Vision API** to:
+
+- Describe what is in front of the user
+- Read visible text aloud
+- Provide safe navigation guidance
+- Identify objects directly in view
+
+Everything is designed for **hands-free, audio-first interaction** — users can control the entire experience using only their voice.
+
+---
 
 ## Features
-- 🎯 Scene Description
-- 📖 Text Reading (OCR)
-- 🧭 Navigation Assistance
-- 🎤 Voice Commands
-- 📱 PWA (Install on mobile)
+
+| Feature | Description |
+|---|---|
+| **Explore Mode** | AI describes surroundings with spatial relationships and hazard warnings |
+| **Read Mode** | Extracts and reads all visible text from signs, documents, screens, etc. |
+| **Navigate Mode** | Analyzes the path ahead, identifies obstacles, stairs, and directions |
+| **Object Identification** | Identifies and describes the primary object in view |
+| **Voice Commands** | Fully hands-free via speech recognition |
+| **Text-to-Speech** | Priority-queued speech output with configurable rate, pitch, and voice |
+| **Camera Switching** | Toggle between front and rear cameras |
+| **Auto-Describe** | Optional periodic automatic scene descriptions |
+| **Haptic Feedback** | Vibration patterns for non-visual confirmation |
+| **High Contrast UI** | Accessible visual mode for low-vision users |
+| **PWA / Installable** | Works as a native-like app on Android, iOS, and desktop |
+| **Offline UI** | Core interface assets cached via Service Worker |
+| **Onboarding Flow** | Guided introduction for first-time users |
+
+---
+
+## How It Works
+
+```
+Camera Feed → Frame Capture → Gemini Vision API → AI Description → Text-to-Speech
+     ↑                                                                    ↓
+Voice Command ←────────────────── User ──────────────────────────── Audio Output
+```
+
+1. The device camera streams a live feed.
+2. When triggered (by button, voice, or auto-describe), a frame is captured from the video stream.
+3. The JPEG frame is sent to the **Google Gemini API** with a mode-specific prompt.
+4. Gemini returns a natural language description optimized for accessibility.
+5. The description is displayed on screen and spoken aloud via the **Web Speech API**.
+6. The user can issue voice commands at any time to switch modes, repeat descriptions, stop speech, or ask free-form questions.
+
+---
 
 ## Tech Stack
-- Vanilla JS (no framework for max performance)
-- Gemini 2.5 Flash Lite API
-- Web Speech API (TTS)
-- PWA with Service Worker
+
+- **Frontend**: Vanilla JavaScript (ES6+), HTML5, CSS3
+- **AI Vision**: Google Gemini 2.5 Flash Lite (`gemini-2.5-flash-lite`)
+- **Speech Output**: Web Speech API — `SpeechSynthesis`
+- **Voice Input**: Web Speech API — `SpeechRecognition` / `webkitSpeechRecognition`
+- **Camera**: `MediaDevices.getUserMedia()` / `MediaStream`
+- **PWA**: Service Worker, Web App Manifest
+- **Deployment**: Vercel (static deployment)
+- **Build**: Node.js build script for environment variable injection
+
+---
+
+## Project Structure
+
+```
+real-time-accessebility-assistant/
+├── index.html              # Main HTML shell — full UI markup
+├── manifest.json           # PWA manifest (icons, shortcuts, metadata)
+├── sw.js                   # Service Worker — offline caching
+├── build.js                # Build script — injects API key into config
+├── vercel.json             # Vercel deployment config
+├── package.json
+│
+├── js/
+│   ├── config.js           # Runtime config (generated by build — do not commit)
+│   ├── config.template.js  # Template for config.js — safe to commit
+│   ├── app.js              # Main application controller & orchestration
+│   ├── camera.js           # Camera stream management & frame capture
+│   ├── gemini.js           # Gemini AI Vision API integration & prompts
+│   ├── speech.js           # Text-to-speech with priority queue
+│   ├── voice-commands.js   # Speech recognition & command dispatch
+│   └── ui.js               # UI state, modals, toasts & preferences
+│
+├── styles/
+│   └── main.css            # All styles including high-contrast theme
+│
+└── icons/                  # PWA icons (72px → 512px)
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- **Node.js** (v16 or later) — only needed for the build step
+- A **Google Gemini API Key** — obtain one free from [Google AI Studio](https://aistudio.google.com/app/apikey)
+- A modern browser with camera access (Chrome or Edge recommended for full voice support)
+
+### Local Development
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/DevSujal/real-time-accessebility-assistant.git
+   cd real-time-accessebility-assistant
+   ```
+
+2. **Add your Gemini API key**
+
+   Run the build script with your key set as an environment variable:
+
+   ```bash
+   GEMINI_API_KEY=your_actual_api_key_here npm run build
+   ```
+
+   This generates `js/config.js` with your key injected from the template.
+
+   > **Security note**: `js/config.js` contains your real API key. Never commit it to version control.
+
+   **Alternative** (quick setup): Open `js/config.js` directly and replace the placeholder:
+
+   ```js
+   GEMINI_API_KEY: 'your_actual_api_key_here',
+   ```
+
+3. **Start the local server**
+
+   ```bash
+   npm start
+   ```
+
+   The app will be available at `http://localhost:3000`.
+
+4. **Allow camera and microphone permissions** when prompted by the browser.
+
+### Deploy to Vercel
+
+1. **Fork or push this repo** to your GitHub account.
+
+2. **Import the project** in the [Vercel dashboard](https://vercel.com/new).
+
+3. **Set the environment variable** in Vercel project settings:
+   - Name: `GEMINI_API_KEY`
+   - Value: your Gemini API key
+
+4. Vercel automatically runs `npm run build` (configured in `vercel.json`) to inject your key before deployment.
+
+5. **Deploy** — your app will be live at your assigned Vercel URL.
+
+---
+
+## Usage Guide
+
+### Modes
+
+Select a mode using the tab buttons at the bottom of the screen, then tap the primary action button (or use a voice command) to analyze the current camera view.
+
+| Mode | Button Label | What It Does |
+|---|---|---|
+| **Explore** | Describe | Describes the scene: objects, layout, colors, spatial relationships, and hazards |
+| **Read** | Read | Extracts and reads all visible text — signs, labels, documents, screens |
+| **Navigate** | Navigate | Assesses the path ahead, identifies obstacles and hazards, suggests directions |
+
+There is also a hidden **Identify** mode accessible via voice command (`"identify"` / `"what is this"`) that focuses on describing the primary object in the center of the frame.
+
+### Voice Commands
+
+Tap the **microphone button** to activate the voice command listener, then speak any of the following:
+
+| Command Phrase(s) | Action |
+|---|---|
+| `describe`, `look`, `what do you see`, `what's ahead` | Describe the current scene (Explore mode) |
+| `read`, `read this`, `read text`, `what does it say` | Read visible text (Read mode) |
+| `navigate`, `path`, `help me navigate` | Get navigation guidance (Navigate mode) |
+| `identify`, `what is this`, `what's this` | Identify the main object in view |
+| `repeat`, `say again`, `again` | Repeat the last spoken description |
+| `stop`, `quiet`, `silence`, `pause` | Stop current speech output |
+| `switch camera`, `flip camera`, `selfie` | Toggle between front and rear camera |
+| `help`, `commands`, `what can you do` | Hear available commands |
+
+Any unrecognized speech is treated as a free-form question and sent to Gemini together with the current camera frame for a contextual answer.
+
+### Keyboard Shortcuts
+
+For users with keyboard-only interaction:
+
+| Key | Action |
+|---|---|
+| `Space` / `Enter` | Trigger the current mode action |
+| `1` | Switch to Explore mode |
+| `2` | Switch to Read mode |
+| `3` | Switch to Navigate mode |
+| `R` | Repeat last description |
+| `Escape` | Close the settings modal |
+
+### Settings
+
+Open **Settings** (gear icon, top right) to configure:
+
+- **Speech Rate** — Speed of text-to-speech output (0.5× to 2×)
+- **Speech Pitch** — Pitch of the TTS voice
+- **Voice** — Choose from all available system TTS voices
+- **Auto-Describe** — Automatically analyze the scene at regular intervals
+- **Haptic Feedback** — Enable/disable vibration confirmation on actions
+- **High Contrast** — Toggle a high-contrast visual theme for low-vision users
+
+All settings are persisted to `localStorage` and restored automatically on next launch.
+
+---
+
+## Configuration
+
+The app is configured via `js/config.js`, generated at build time from `js/config.template.js`:
+
+```js
+const CONFIG = {
+    GEMINI_API_KEY: 'your_key_here',        // Injected from GEMINI_API_KEY env var
+    GEMINI_MODEL: 'gemini-2.5-flash-lite',  // Gemini model for vision analysis
+    API_BASE_URL: 'https://generativelanguage.googleapis.com/v1beta',
+    APP_NAME: 'VisionAssist',
+    VERSION: '1.0.0'
+};
+```
+
+To use a different model (e.g., `gemini-2.0-flash` for higher quality), update `GEMINI_MODEL` in `config.template.js` and rebuild.
+
+**Gemini generation parameters** (tunable in `js/gemini.js`):
+
+| Parameter | Default | Purpose |
+|---|---|---|
+| `temperature` | `0.4` | Focused, consistent responses |
+| `topP` | `0.8` | Controlled output diversity |
+| `maxOutputTokens` | `300` | Concise descriptions for faster audio output |
+
+---
+
+## Architecture
+
+VisionAssist uses a **module-based vanilla JS architecture** with singleton managers exposed on `window`:
+
+```
+window.CONFIG               — frozen app configuration object
+window.cameraManager        — camera stream & frame capture        (camera.js)
+window.geminiManager        — Gemini API calls & prompts           (gemini.js)
+window.speechManager        — TTS priority queue & voice settings  (speech.js)
+window.voiceCommandManager  — speech recognition & command routing (voice-commands.js)
+window.uiManager            — DOM state, modals, toasts, prefs     (ui.js)
+```
+
+`app.js` is the central orchestrator — it initializes all managers in the correct order and wires events together:
+
+1. **Voice command → action**: A `voiceCommand` custom event from `voiceCommandManager` routes to the appropriate manager method in `app.js`.
+2. **Button tap → analysis**: Action button click calls `cameraManager.captureFrame()` → `geminiManager.analyzeImage()` → result passed to `speechManager.speak()` and `uiManager.setDescription()`.
+3. **Mode change**: `uiManager.setMode()` dispatches a `modeChange` event; `app.js` uses this to select the correct Gemini prompt on the next capture.
+4. **Speech priority**: Urgent alerts (hazards, errors) use `speechManager.urgent()`, which interrupts any ongoing speech and clears lower-priority items from the queue.
+
+---
+
+## Accessibility
+
+VisionAssist is built from the ground up for accessibility:
+
+- **ARIA live regions**: `role="log"`, `aria-live="polite"`, and `role="status"` ensure screen readers announce all dynamic content changes.
+- **Skip link**: A "Skip to main content" link is provided for keyboard and screen reader users.
+- **Focus management**: Modals trap focus while open and restore it to the trigger element on close.
+- **Descriptive labels**: Every interactive control has an `aria-label` or `aria-labelledby` attribute.
+- **High contrast theme**: A full alternative color scheme is togglable via settings or by adding the `high-contrast` class to `<body>`.
+- **Haptic feedback**: The Vibration API provides tactile confirmation for button presses on supported devices.
+- **Keyboard operability**: All features are reachable and operable via keyboard alone, with no mouse required.
+- **Priority speech queue**: Hazard and error messages use an urgent priority level that interrupts lower-priority speech, ensuring critical information is never delayed.
+
+---
+
+## License
+
+MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+<div align="center">
+
+Built with care for the visually impaired community.  
+Powered by [Google Gemini AI](https://deepmind.google/technologies/gemini/).
+
+</div>
